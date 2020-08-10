@@ -2,7 +2,6 @@ var express = require('express');
 var http = require('http');
 
 var handleError = require('../utils/handleError.js');
-var spotifyCredentials = require('../secrets.js');
 
 var router = express.Router();
 
@@ -10,7 +9,7 @@ var router = express.Router();
 router.get('/get_credentials', function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "*");
-  
+
   res.status(200).json(spotifyCredentials);
 })
 
