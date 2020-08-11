@@ -23,9 +23,7 @@ router.get('/auth_request', function(req, res, next) {
 /* POST get_tokens: body contains auth_code */
 router.post('/get_tokens', function(req, res, next) {
   try {
-    console.log(req.body);
     var code = req.body.auth_code;
-    console.log("AUTH CODE: " + code);
 
     // make call to spotify api
     var creds = `${spotifyCredentials.CLIENT_ID}:${spotifyCredentials.CLIENT_SECRET}`;
@@ -54,9 +52,7 @@ router.post('/get_tokens', function(req, res, next) {
 
 /* POST refresh_token: body contains refresh_token */
 router.post('/refresh_tokens', function(req, res, next) {
-  console.log(req.body);
   const refresh_token = req.body.refresh_token;
-  console.log("REFRESH TOKEN: " + refresh_token);
 
   // make call to spotify api
   const creds = `${spotifyCredentials.CLIENT_ID}:${spotifyCredentials.CLIENT_SECRET}`;
@@ -78,12 +74,5 @@ router.post('/refresh_tokens', function(req, res, next) {
     handleError(res, err, msg, 500);
   });
 })
-
-/* redirect from auth_request: GET tokens from Spotify. */
-router.get('/redirect', function(req, res, next) {
-  const auth_code = req.query.code;
-  console.log(auth_code)
-  res.status(200).json(auth_code);
-});
 
 module.exports = router;
