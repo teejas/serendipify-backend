@@ -1,31 +1,82 @@
-var express = require('express');
-var http = require('http');
+const express = require('express');
+const axios = require('axios')
 
-var handleError = require('../utils/handleError.js');
+const handleError = require('../utils/handleError.js');
 
-var router = express.Router();
+const router = express.Router();
 
-/* GET credentials for authRequest() */
-router.get('/get_credentials', function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "*");
-
-  res.status(200).json(spotifyCredentials);
-})
-
-/* GET auth request */
+/* GET auth_request */
 router.get('/auth_request', function(req, res, next) {
-  var scopes = 'playlist-read-private playlist-modify-public playlist-modify-private user-library-read user-library-modify user-top-read streaming user-read-playback-state user-modify-playback-state';
+  const scopes = 'playlist-read-private playlist-modify-public playlist-modify-private user-library-read user-library-modify user-top-read streaming user-read-playback-state user-modify-playback-state';
 
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "*");
 
   res.status(200).json('https://accounts.spotify.com/authorize' +
     '?response_type=code' +
-    '&client_id=' + process.env.CLIENT_ID +
+    '&client_id=' + spotifyCredentials.CLIENT_ID +
     (scopes ? '&scope=' + encodeURIComponent(scopes) : '') +
-    '&redirect_uri=' + encodeURIComponent(process.env.REDIRECT_URI)
+    '&redirect_uri=' + encodeURIComponent(spotifyCredentials.REDIRECT_URI)
   );
+})
+
+/* POST get_tokens: body contains auth_code */
+router.post('/get_tokens', function(req, res, next) {
+  try {
+    console.log(req.body);
+    var code = req.body.auth_code;
+    console.log("AUTH CODE: " + code);
+
+    // make call to spotify api
+    var creds = `${spotifyCredentials.CLIENT_ID}:${spotifyCredentials.CLIENT_SECRET}`;
+    var creds_base64 = Buffer.from(creds).toString('base64');
+
+    const body = `grant_type=authorization_code&code=${code}&redirect_uri=${spotifyCredentials.REDIRECT_URI}`;
+    const config = {
+      headers: {
+        Authorization: `Basic ${creds_base64}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    }
+    axios.post('https://accounts.spotify.com/api/token', body, config)
+    .then((tokens_res) => {
+      console.log('Body: ', tokens_res.data);
+      res.status(200).json(tokens_res.data);
+    }).catch((err) => {
+      const msg = "Error with POST request to spotify API for /get_tokens...";
+      handleError(res, error, msg, 500);
+    });
+  } catch(error) {
+    const msg = "Error with /get_tokens endpoint...";
+    handleError(res, error, msg, 500);
+  }
+})
+
+/* POST refresh_token: body contains refresh_token */
+router.post('/refresh_tokens', function(req, res, next) {
+  console.log(req.body);
+  const refresh_token = req.body.refresh_token;
+  console.log("REFRESH TOKEN: " + refresh_token);
+
+  // make call to spotify api
+  const creds = `${spotifyCredentials.CLIENT_ID}:${spotifyCredentials.CLIENT_SECRET}`;
+  const creds_base64 = Buffer.from(creds).toString('base64');
+
+  const body = `grant_type=refresh_token&refresh_token=${refresh_token}`;
+  const config = {
+    headers: {
+      Authorization: `Basic ${creds_base64}`,
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  };
+  axios.post('https://accounts.spotify.com/api/token', body, config)
+  .then((tokens_res) => {
+    console.log('Body: ', tokens_res.data);
+    res.status(200).json(tokens_res.data);
+  }).catch((err) => {
+    const msg = "Error with POST request to spotify API for /refresh_tokens..."
+    handleError(res, err, msg, 500);
+  });
 })
 
 /* redirect from auth_request: GET tokens from Spotify. */

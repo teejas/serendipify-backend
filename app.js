@@ -15,6 +15,19 @@ var corsOptions = {
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
 
+// setup spotify credentials
+if(process.env.CLIENT_ID) {
+  console.log("Getting credentials from heroku config")
+  global.spotifyCredentials = {
+    CLIENT_ID: process.env.CLIENT_ID,
+    CLIENT_SECRET: process.env.CLIENT_SECRET,
+    REDIRECT_URI: process.env.REDIRECT_URI,
+  }
+} else {
+  console.log("Getting credentials from secrets.js")
+  global.spotifyCredentials = require('./secrets.js')
+}
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
