@@ -11,7 +11,7 @@ var loginRouter = require('./api/login')
 var app = express();
 
 var corsOptions = {
-  origin: ['http://localhost:19006', 'exp://192.168.86.36:19000', 'http://juko.netlify.app'], // localhost for development
+  origin: ['http://localhost:19006', 'exp://192.168.86.36:19000', 'https://juko.netlify.app'], // localhost for development
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
 
