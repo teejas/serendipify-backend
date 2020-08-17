@@ -39,12 +39,13 @@ router.post('/auth_request', function(req, res, next) {
 router.post('/get_tokens', function(req, res, next) {
   try {
     var code = req.body.auth_code;
+    var redirect_uri = req.body.redirect_uri;
 
     // make call to spotify api
     var creds = `${spotifyCredentials.CLIENT_ID}:${spotifyCredentials.CLIENT_SECRET}`;
     var creds_base64 = Buffer.from(creds).toString('base64');
 
-    const body = `grant_type=authorization_code&code=${code}&redirect_uri=${spotifyCredentials.REDIRECT_URI}`;
+    const body = `grant_type=authorization_code&code=${code}&redirect_uri=${redirect_uri}`;
     const config = {
       headers: {
         Authorization: `Basic ${creds_base64}`,
@@ -55,7 +56,7 @@ router.post('/get_tokens', function(req, res, next) {
       .then((tokens_res) => {
         console.log('Body: ', tokens_res.data);
         res.status(200).json(tokens_res.data);
-      }).catch((err) => {
+      }).catch((error) => {
         const msg = "Error with POST request to spotify API for /get_tokens...";
         handleError(res, error, msg, 500);
       });
