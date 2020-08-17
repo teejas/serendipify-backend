@@ -41,6 +41,8 @@ router.post('/get_tokens', function(req, res, next) {
     var code = req.body.auth_code;
     var redirect_uri = req.body.redirect_uri;
 
+    console.log(redirect_uri);
+
     // make call to spotify api
     var creds = `${spotifyCredentials.CLIENT_ID}:${spotifyCredentials.CLIENT_SECRET}`;
     var creds_base64 = Buffer.from(creds).toString('base64');
